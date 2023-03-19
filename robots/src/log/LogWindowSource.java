@@ -48,6 +48,9 @@ public class LogWindowSource
     public void append(LogLevel logLevel, String strMessage)
     {
         LogEntry entry = new LogEntry(logLevel, strMessage);
+        if (m_messages.size() >= m_iQueueLength) {
+            m_messages.remove(0);
+        }
         m_messages.add(entry);
         LogChangeListener [] activeListeners = m_activeListeners;
         if (activeListeners == null)
