@@ -11,8 +11,7 @@ public class Target {
         m_positionY = positionY;
     }
 
-    protected void setPosition(Point p)
-    {
+    protected void setPosition(Point p) {
         m_positionX = p.x;
         m_positionY = p.y;
     }
