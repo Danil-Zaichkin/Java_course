@@ -71,7 +71,7 @@ public class MainApplicationFrame extends JFrame {
                 "Управление режимом отображения приложения");
 
         Listener(lookAndFeelMenu);
-
+        addAction(lookAndFeelMenu);
         JMenu testMenu = new JMenu("Тесты");
         testMenu.setMnemonic(KeyEvent.VK_T);
         testMenu.getAccessibleContext().setAccessibleDescription(
@@ -84,7 +84,14 @@ public class MainApplicationFrame extends JFrame {
         return menuBar;
     }
 
-
+    private void addAction(JMenu lookAndFeelMenu){
+        JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
+        crossplatformLookAndFeel.addActionListener((event) -> {
+            setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+            this.invalidate();
+        });
+        lookAndFeelMenu.add(crossplatformLookAndFeel);
+    }
     private void Listener(JMenu lookAndFeelMenu) {
         JMenuItem systemLookAndFeel = new JMenuItem("Системная схема", KeyEvent.VK_S);
         systemLookAndFeel.addActionListener((event) -> {
