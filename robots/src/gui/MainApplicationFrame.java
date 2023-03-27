@@ -3,6 +3,9 @@ package gui;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -23,7 +26,8 @@ import log.Logger;
  */
 public class MainApplicationFrame extends JFrame {
     private final JDesktopPane desktopPane = new JDesktopPane();
-
+    private final GameWindow gameWindow = new GameWindow();
+    private final LogWindow logWindow;
     public MainApplicationFrame() {
         //Make the big window be indented 50 pixels from each edge
         //of the screen.
@@ -36,13 +40,11 @@ public class MainApplicationFrame extends JFrame {
         setContentPane(desktopPane);
 
 
-        LogWindow logWindow = createLogWindow();
+        logWindow = createLogWindow();
         addWindow(logWindow);
 
-        GameWindow gameWindow = new GameWindow();
         gameWindow.setSize(400, 400);
         addWindow(gameWindow);
-
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(EXIT_ON_CLOSE);
     }
@@ -64,7 +66,9 @@ public class MainApplicationFrame extends JFrame {
 
     private JMenuBar generateMenuBar() {
         JMenuBar menuBar = new JMenuBar();
-
+        JMenu local = new JMenu("Язык");
+        local.setMnemonic(KeyEvent.VK_W);
+        local.getAccessibleContext().setAccessibleDescription("Смена языка на доступные");
         JMenu lookAndFeelMenu = new JMenu("Режим отображения");
         lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
         lookAndFeelMenu.getAccessibleContext().setAccessibleDescription(
@@ -76,14 +80,62 @@ public class MainApplicationFrame extends JFrame {
         testMenu.setMnemonic(KeyEvent.VK_T);
         testMenu.getAccessibleContext().setAccessibleDescription(
                 "Тестовые команды");
-
+        addLanguage(local,lookAndFeelMenu,testMenu);
         addLog(testMenu);
-
+        menuBar.add(local);
         menuBar.add(lookAndFeelMenu);
         menuBar.add(testMenu);
         return menuBar;
     }
+    // добавлен метод для создания кнопок смены языка.
 
+    /**
+     *
+     * @param local - меню языка
+     * @param look - меню для отображения
+     * @param testMenu - меню для тестов
+     */
+    private void addLanguage(JMenu local,JMenu look,JMenu testMenu){
+        JMenuItem setLang = new JMenuItem("Английский язык",KeyEvent.VK_N);
+        JMenuItem setLangRu = new JMenuItem("Русский язык",KeyEvent.VK_N);
+        setLang.addActionListener((event) -> {Locale curr = new Locale("UK");
+            changeToLan(look,curr,testMenu,local);this.invalidate();});
+        local.add(setLang);
+        setLangRu.addActionListener((event) -> {Locale curr = new Locale("RU");
+            changeToLan(look,curr,testMenu,local);this.invalidate();});
+        local.add(setLangRu);
+    }
+    // метод меняющий язык для каждого слова
+
+    /**
+     *
+     * @param lookAndFeelMenu - меню отображения
+     * @param curr - параметр языка
+     * @param testMenu - меню теста
+     * @param local - меню языка
+     */
+    private void changeToLan(JMenu lookAndFeelMenu ,Locale curr,JMenu testMenu,JMenu local){
+        ResourceBundle rb = ResourceBundle.getBundle("lang",curr);
+
+//        Iterator<String> list = rb.getKeys().asIterator();
+//        while (list.hasNext()) {
+//            System.out.println(list.next());
+//        }
+        logWindow.getMLogContent().setText(rb.getString("work"));
+        logWindow.setTitle(rb.getString("protocol"));
+        gameWindow.setTitle(rb.getString("window"));
+        local.setText(rb.getString("language"));
+        local.getItem(0).setText(rb.getString("english"));
+        local.getItem(1).setText(rb.getString("russian"));
+        lookAndFeelMenu.setText(rb.getString("display"));
+        lookAndFeelMenu.getItem(0).setText(rb.getString("system"));
+        lookAndFeelMenu.getItem(1).setText(rb.getString("universal"));
+        testMenu.setText(rb.getString("test"));
+        testMenu.getItem(0).setText(rb.getString("message"));
+
+
+
+    }
     private void addAction(JMenu lookAndFeelMenu){
         JMenuItem crossplatformLookAndFeel = new JMenuItem("Универсальная схема", KeyEvent.VK_S);
         crossplatformLookAndFeel.addActionListener((event) -> {

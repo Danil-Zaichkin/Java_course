@@ -29,7 +29,12 @@ public class Robot {
         }
         m_positionX = newX;
         m_positionY = newY;
-        double newDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);
+        double newDirection;
+        if (m_positionX < 0) {newDirection = -540; m_positionX = 10;}
+        else if (m_positionY > 400) {newDirection = -8; m_positionY = 390;}
+        else if (m_positionX > 500) {newDirection = 8; m_positionX = 395;}
+        else if (m_positionY < 0) {newDirection = 8; m_positionY = 10;}
+        else newDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);
         m_robotDirection = newDirection;
     }
 
