@@ -50,7 +50,8 @@ public class LogWindow extends JInternalFrame implements LogChangeListener {
 
     @Override
     public void doDefaultCloseAction() {
-        m_logSource.unregisterListener(this);
+        if (m_logSource != null)
+            m_logSource.unregisterListener(this);
         super.doDefaultCloseAction();
     }
 }
