@@ -1,9 +1,9 @@
 package gui;
 
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import logic.Robot;
+import logic.Target;
+
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
@@ -14,7 +14,6 @@ import javax.swing.JPanel;
 
 public class GameVisualizer extends JPanel {
     private final Timer m_timer = initTimer();
-
     private static Timer initTimer() {
         Timer timer = new Timer("events generator", true);
         return timer;
@@ -27,11 +26,13 @@ public class GameVisualizer extends JPanel {
     private volatile int m_targetPositionX = 150;
     private volatile int m_targetPositionY = 100;
 
+    private Dimension screenSize;
+
     private Robot robot;
     private Target target;
 
-    public GameVisualizer() {
-        robot = new Robot(m_robotPositionX, m_robotPositionY);
+    public GameVisualizer(Dimension dimension) {
+        robot = new Robot(m_robotPositionX, m_robotPositionY, dimension);
         target = new Target(m_targetPositionX, m_targetPositionY);
         m_timer.schedule(new TimerTask() {
             @Override
@@ -52,6 +53,7 @@ public class GameVisualizer extends JPanel {
                 repaint();
             }
         });
+
         setDoubleBuffered(true);
     }
 

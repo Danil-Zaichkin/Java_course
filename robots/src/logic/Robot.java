@@ -1,44 +1,37 @@
-package gui;
+package logic;
+
+import java.awt.*;
 
 public class Robot {
     private volatile double m_positionX;
     private volatile double m_positionY;
     private volatile double m_robotDirection = 0;
     private static final double maxVelocity = 0.1;
-    private static final double maxAngularVelocity = 0.001;
+    private static final double maxAngularVelocity = 0.002;
 
-    Robot(double positionX, double positionY) {
+    private Dimension dimension;
+
+    public Robot(double positionX, double positionY, Dimension dimension) {
         m_positionX = positionX;
         m_positionY = positionY;
+        this.dimension = dimension;
     }
 
-    private void moveRobot(double velocity, double angularVelocity, double duration) {
+    private void moveRobot(double velocity, double angularVelocity, double duration, Dimension dimension) {
         velocity = applyLimits(velocity, 0, maxVelocity);
         angularVelocity = applyLimits(angularVelocity, -maxAngularVelocity, maxAngularVelocity);
-        double newX = m_positionX + velocity / angularVelocity *
-                (Math.sin(m_robotDirection + angularVelocity * duration) -
-                        Math.sin(m_robotDirection));
-        if (!Double.isFinite(newX)) {
-            newX = m_positionX + velocity * duration * Math.cos(m_robotDirection);
-        }
-        double newY = m_positionY - velocity / angularVelocity *
-                (Math.cos(m_robotDirection + angularVelocity * duration) -
-                        Math.cos(m_robotDirection));
-        if (!Double.isFinite(newY)) {
-            newY = m_positionY + velocity * duration * Math.sin(m_robotDirection);
-        }
-        m_positionX = newX;
-        m_positionY = newY;
-        double newDirection;
-        if (m_positionX < 0) {newDirection = -540; m_positionX = 10;}
-        else if (m_positionY > 400) {newDirection = -8; m_positionY = 390;}
-        else if (m_positionX > 500) {newDirection = 8; m_positionX = 395;}
-        else if (m_positionY < 0) {newDirection = 8; m_positionY = 10;}
-        else newDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);
+        double newDirection = asNormalizedRadians(m_robotDirection + angularVelocity * duration);
+
+        double newX = m_positionX + velocity * duration * Math.cos(newDirection);
+        double newY = m_positionY + velocity * duration * Math.sin(newDirection);
+
+        m_positionX = applyLimits(newX, 0, dimension.width);
+        m_positionY = applyLimits(newY, 0, dimension.height);
+
         m_robotDirection = newDirection;
     }
 
-    protected void onModelUpdateEvent(double m_targetPositionX, double m_targetPositionY) {
+    public void onModelUpdateEvent(double m_targetPositionX, double m_targetPositionY) {
         double distance = distance(m_targetPositionX, m_targetPositionY,
                 m_positionX, m_positionY);
         if (distance < 0.5) {
@@ -47,15 +40,26 @@ public class Robot {
         double velocity = maxVelocity;
         double angleToTarget = angleTo(m_positionX, m_positionY, m_targetPositionX, m_targetPositionY);
         double angularVelocity = 0;
-        if (angleToTarget > m_robotDirection) {
-            angularVelocity = maxAngularVelocity;
-        }
-        if (angleToTarget < m_robotDirection) {
-            angularVelocity = -maxAngularVelocity;
+
+        if (Math.abs(m_robotDirection - angleToTarget) < 10e-7) {
+            angularVelocity = m_robotDirection;
+        } else if (m_robotDirection >= Math.PI) {
+            if (m_robotDirection - Math.PI < angleToTarget && angleToTarget < m_robotDirection)
+                angularVelocity = -maxAngularVelocity;
+            else
+                angularVelocity = maxAngularVelocity;
+        } else {
+            if (m_robotDirection < angleToTarget && angleToTarget < m_robotDirection + Math.PI)
+                angularVelocity = maxAngularVelocity;
+            else
+                angularVelocity = -maxAngularVelocity;
         }
 
-        moveRobot(velocity, angularVelocity, 10);
+        moveRobot(velocity, angularVelocity, 10, dimension);
+
+
     }
+
 
     private static double applyLimits(double value, double min, double max) {
         if (value < min)
