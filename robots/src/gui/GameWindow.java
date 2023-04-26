@@ -1,16 +1,16 @@
 package gui;
 
+import localization.LangDispatcher;
+
 import java.awt.*;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 
-public class GameWindow extends AbstractWindow {
+public class GameWindow extends RobotInternalFrame {
     private final GameVisualizer m_visualizer;
 
     public GameWindow(Dimension dimension) {
-        super("window.game", true, true, true, true);
+        super("window.game", LangDispatcher.getInstance());
         setSize(dimension);
         m_visualizer = new GameVisualizer(dimension);
         JPanel panel = new JPanel(new BorderLayout());

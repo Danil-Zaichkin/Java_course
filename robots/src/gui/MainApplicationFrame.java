@@ -2,30 +2,23 @@ package gui;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
-import java.awt.event.WindowAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
+import java.util.Locale;
 
 import javax.swing.*;
 
-import localisation.Localisation;
+import gui.adapters.LangChangeAdapter;
+import gui.adapters.RobotsFrameAdapter;
+import localization.LangChangeable;
+import localization.LangDispatcher;
+import localization.Localization;
 import log.Logger;
-import gui.menu.MenuBar;
 
-/**
- * Что требуется сделать:
- * 1. Метод создания меню перегружен функционалом и трудно читается.
- * Следует разделить его на серию более простых методов (или вообще выделить отдельный класс).
- */
-public class MainApplicationFrame extends JFrame {
+public class MainApplicationFrame extends JFrame implements LangChangeable {
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private final ArrayList<AbstractWindow> windows  = new ArrayList<>();
-    private MenuBar menuBar;
-
+    private final LangDispatcher langDispatcher = LangDispatcher.getInstance();
     public MainApplicationFrame() {
-//        super("window.main", true, true, true, true);
-        //Make the big window be indented 50 pixels from each edge
-        //of the screen.
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
@@ -37,14 +30,96 @@ public class MainApplicationFrame extends JFrame {
         GameWindow gameWindow = new GameWindow(dimension);
         gameWindow.setSize(400, 400);
         addWindow(gameWindow);
-        windows.add(logWindow);
-        windows.add(gameWindow);
 
-        menuBar = new MenuBar(this, windows);
-        setJMenuBar(menuBar.generate());
+        setJMenuBar(generateMenuBar());
 
-        setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        addClosingEvent();
+        addPropertyChangeListener(new LangChangeAdapter(this, langDispatcher));
+        addWindowListener(new RobotsFrameAdapter(this));
+    }
+
+    public JMenuBar generateMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+
+        menuBar.add(generateLanguageMenu());
+        menuBar.add(generateLookAndFeelMenu());
+        menuBar.add(generateLogMenu());
+        menuBar.add(generateExitMenu());
+        return menuBar;
+    }
+
+    private JMenu generateLanguageMenu() {
+        JMenu local = new JMenu(Localization.getString("language"));
+        local.setMnemonic(KeyEvent.VK_W);
+        local.getAccessibleContext().setAccessibleDescription("Смена языка на доступные");
+        JMenuItem setLangEn = new JMenuItem(Localization.getString("language.english"), KeyEvent.VK_N);
+        JMenuItem setLangRu = new JMenuItem(Localization.getString("language.russian"), KeyEvent.VK_N);
+        setLangEn.addActionListener((event) -> {
+            langDispatcher.setLocale(new Locale("UK"));
+        });
+        setLangRu.addActionListener((event) -> {
+            langDispatcher.setLocale(new Locale("RU"));
+        });
+        local.add(setLangEn);
+        local.add(setLangRu);
+        return local;
+    }
+
+    private JMenu generateLogMenu() {
+        JMenu testMenu = new JMenu(Localization.getString("tests"));
+        testMenu.setMnemonic(KeyEvent.VK_T);
+        testMenu.getAccessibleContext().setAccessibleDescription("Тестовые команды");
+        JMenuItem addLogMessageItem = new JMenuItem(Localization.getString("test.message"), KeyEvent.VK_S);
+        addLogMessageItem.addActionListener((event) -> {
+            Logger.debug(Localization.getString("message.log"));
+        });
+        testMenu.add(addLogMessageItem);
+        return testMenu;
+    }
+
+    private JMenu generateLookAndFeelMenu() {
+        JMenu lookAndFeelMenu = new JMenu(Localization.getString("display"));
+        lookAndFeelMenu.setMnemonic(KeyEvent.VK_V);
+        lookAndFeelMenu.getAccessibleContext().setAccessibleDescription("Управление режимом отображения приложения");
+        addLookAndFeelItem(lookAndFeelMenu, "display.universal",
+                UIManager.getCrossPlatformLookAndFeelClassName());
+        addLookAndFeelItem(lookAndFeelMenu, "display.system",
+                UIManager.getSystemLookAndFeelClassName());
+
+        return lookAndFeelMenu;
+
+    }
+    private void addLookAndFeelItem(JMenu lookAndFeelMenu, String name, String className) {
+        JMenuItem crossplatformLookAndFeel = new JMenuItem(
+                Localization.getString(name),
+                KeyEvent.VK_S
+        );
+        crossplatformLookAndFeel.addActionListener((event) -> {
+            setLookAndFeel(className);
+            this.invalidate();
+        });
+        lookAndFeelMenu.add(crossplatformLookAndFeel);
+    }
+
+    private void setLookAndFeel(String className) {
+        try {
+            UIManager.setLookAndFeel(className);
+            SwingUtilities.updateComponentTreeUI(this);
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException |
+                 UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+    }
+    private JMenu generateExitMenu() {
+        JMenu exitMenu = new JMenu(Localization.getString("exit"));
+        JMenuItem exitMenuItem = new JMenuItem(Localization.getString("exit"));
+        exitMenuItem.addActionListener((event) -> {
+            this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+        });
+        exitMenu.add(exitMenuItem);
+        return exitMenu;
+    }
+    private void updateGUI() {
+        this.setJMenuBar(generateMenuBar());
     }
 
     protected LogWindow createLogWindow() {
@@ -53,7 +128,7 @@ public class MainApplicationFrame extends JFrame {
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
         logWindow.pack();
-        Logger.debug(Localisation.getString("message.work"));
+        Logger.debug(Localization.getString("message.work"));
         return logWindow;
     }
 
@@ -61,23 +136,8 @@ public class MainApplicationFrame extends JFrame {
         desktopPane.add(frame);
         frame.setVisible(true);
     }
-
-    private void addClosingEvent() {
-        addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                Object[] options = {Localisation.getString("exit.yes"), Localisation.getString("exit.no")};
-                int n = JOptionPane.showOptionDialog(e.getWindow(),
-                                Localisation.getString("exit.question"),
-                            Localisation.getString("exit.title"),
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.QUESTION_MESSAGE, null, options,
-                                options[0]);
-                if (n == 0) {
-                    e.getWindow().setVisible(false);
-                    System.exit(0);
-                }
-            }
-        });
+    @Override
+    public void updateLang() {
+        updateGUI();
     }
 }

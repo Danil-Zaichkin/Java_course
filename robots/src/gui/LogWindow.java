@@ -5,19 +5,18 @@ import java.awt.EventQueue;
 import java.awt.TextArea;
 
 import javax.swing.*;
-import javax.swing.event.InternalFrameAdapter;
-import javax.swing.event.InternalFrameEvent;
 
+import localization.LangDispatcher;
 import log.LogChangeListener;
 import log.LogEntry;
 import log.LogWindowSource;
 
-public class LogWindow extends AbstractWindow implements LogChangeListener {
+public class LogWindow extends RobotInternalFrame implements LogChangeListener {
     private LogWindowSource m_logSource;
     private TextArea m_logContent;
 
     public LogWindow(LogWindowSource logSource) {
-        super("window.protocol", true, true, true, true);
+        super("window.protocol", LangDispatcher.getInstance());
         m_logSource = logSource;
         m_logSource.registerListener(this);
         m_logContent = new TextArea("");
