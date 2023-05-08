@@ -34,7 +34,9 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         setJMenuBar(generateMenuBar());
 
         addPropertyChangeListener(new LangChangeAdapter(this, langDispatcher));
-        addWindowListener(new RobotsFrameAdapter(this));
+//        SaveStateAdapter adapter = new SaveStateAdapter(gameWindow);
+//        adapter.MakeSave();
+        addWindowListener(new RobotsFrameAdapter(this,gameWindow,logWindow));
     }
 
     public JMenuBar generateMenuBar() {
