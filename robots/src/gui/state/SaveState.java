@@ -1,21 +1,26 @@
 package gui.state;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import javax.swing.*;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Type;
+import java.nio.file.Path;
 
-public class SaveState {
+public class SaveState<T> {
     @SuppressWarnings("unchecked")
-    public void save(JInternalFrame window){
+    static public void save(RobotWindowState windowState, Path jsonPath){
         JSONObject obj = new JSONObject();
-        obj.put("Y",window.getY());
-        obj.put("X",window.getX());
-        obj.put("Width",window.getWidth());
-        obj.put("Height",window.getHeight());
-        try(FileWriter file = new FileWriter("myJson" + window.getTitle() + ".json")){
+        obj.put("Y",windowState.y());
+        obj.put("X",windowState.x());
+        obj.put("Width", windowState.width());
+        obj.put("Height", windowState.height());
+        obj.put("Title", windowState.title());
+        try(FileWriter file = new FileWriter(jsonPath.toFile())){
             file.write(obj.toString());
             file.flush();
         }
@@ -23,35 +28,50 @@ public class SaveState {
             e.printStackTrace();
         }
     }
-    public void recover(JInternalFrame window){
+    static public RobotWindowState recover(Path jsonPath) {
         JSONParser parser = new JSONParser();
-        System.out.println(window);
         try {
-            Object obj = parser.parse(new FileReader("myJson" + window.getTitle() + ".json"));
+            Object obj = parser.parse(new FileReader(jsonPath.toFile()));
             JSONObject jsonObject = (JSONObject) obj;
-            String x = String.valueOf(jsonObject.get("X"));
-            String y = String.valueOf(jsonObject.get("Y"));
-            String width = String.valueOf(jsonObject.get("Width"));
-            String height = String.valueOf(jsonObject.get("Height"));
-            System.out.println(width);
-            window.setSize(Integer.parseInt(width),Integer.parseInt(height));
-            System.out.println(x);
-            window.setLocation(Integer.parseInt(x),Integer.parseInt(y));
-            System.out.println(window.getX());
-
+            int x = Integer.parseInt(String.valueOf(jsonObject.get("X")));
+            int y = Integer.parseInt(String.valueOf(jsonObject.get("Y")));
+            int width = Integer.parseInt(String.valueOf(jsonObject.get("Width")));
+            int height = Integer.parseInt(String.valueOf(jsonObject.get("Height")));
+            String title = String.valueOf(jsonObject.get("Title"));
+            return new RobotWindowState(x, y, height, width, title);
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
-    public boolean checkFileNotFound(JInternalFrame window){
+    static public boolean checkFileNotFound(Path jsonPath){
         JSONParser parser = new JSONParser();
         try {
-            parser.parse(new FileReader("myJson" + window.getTitle() + ".json"));
+            parser.parse(new FileReader(jsonPath.toFile()));
             return true;
         }
         catch (Exception e){
-            e.printStackTrace();
+//            e.printStackTrace();
             return false;
+        }
+    }
+
+    public T recoverT(Path path, Type type) throws FileNotFoundException {
+        FileReader fr = new FileReader(path.toFile());
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        return gson.fromJson(fr, type);
+    }
+
+    public void saveT(Path path, T object) {
+        GsonBuilder builder = new GsonBuilder();
+        Gson gson = builder.create();
+        try(FileWriter file = new FileWriter(path.toFile())){
+            file.write(gson.toJson(object));
+            file.flush();
+        }
+        catch (IOException e){
+            e.printStackTrace();
         }
     }
 }

@@ -4,24 +4,34 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
+import java.beans.PropertyVetoException;
+import java.nio.file.Path;
 import java.util.Locale;
 
 import javax.swing.*;
 
 import gui.adapters.LangChangeAdapter;
 import gui.adapters.RobotsFrameAdapter;
+import gui.state.RobotWindowState;
+import gui.state.StateChangeable;
 import localization.LangChangeable;
 import localization.LangDispatcher;
 import localization.Localization;
 import log.Logger;
 
-public class MainApplicationFrame extends JFrame implements LangChangeable {
+public class MainApplicationFrame extends RobotFrame implements LangChangeable {
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final LangDispatcher langDispatcher = LangDispatcher.getInstance();
+
     public MainApplicationFrame() {
+        super();
+        addWindowListener(new RobotsFrameAdapter(this, Path.of("window.main.json")));
+        addPropertyChangeListener(new LangChangeAdapter(this, langDispatcher));
         int inset = 50;
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
+//        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+//        setSize(screenSize.width - inset * 2, screenSize.height - inset * 2);
+//        setLocation(inset, inset);
+//        setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
         setContentPane(desktopPane);
 
         LogWindow logWindow = createLogWindow();
@@ -33,10 +43,24 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
 
         setJMenuBar(generateMenuBar());
 
-        addPropertyChangeListener(new LangChangeAdapter(this, langDispatcher));
-//        SaveStateAdapter adapter = new SaveStateAdapter(gameWindow);
-//        adapter.MakeSave();
-        addWindowListener(new RobotsFrameAdapter(this,gameWindow,logWindow));
+    }
+    @Override
+    protected void processWindowEvent(final WindowEvent windowEvent) {
+        super.processWindowEvent(windowEvent);
+        if (windowEvent.getID() == WindowEvent.WINDOW_CLOSED) {
+            JInternalFrame[] frames = desktopPane.getAllFrames();
+            for (JInternalFrame frame : frames) {
+                try {
+                    frame.setClosed(true);
+                } catch (PropertyVetoException e) {
+                    frame.setVisible(false);
+                    frame.dispose();
+                }
+            }
+            Localization.save();
+
+            System.exit(0);
+        }
     }
 
     public JMenuBar generateMenuBar() {
@@ -141,5 +165,17 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
     @Override
     public void updateLang() {
         updateGUI();
+    }
+
+    @Override
+    public void changeWindowState(RobotWindowState windowState) {
+        this.setSize(windowState.width(), windowState.height());
+        this.setLocation(windowState.x(), windowState.y());
+
+    }
+
+    @Override
+    public RobotWindowState getWindowState() {
+        return new RobotWindowState(this.getX(), this.getY(), this.getHeight(), this.getWidth(), this.getTitle());
     }
 }

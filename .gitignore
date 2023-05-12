@@ -6,3 +6,4 @@ eclipse.bat
 target
 *.iml
 out
+*.json
