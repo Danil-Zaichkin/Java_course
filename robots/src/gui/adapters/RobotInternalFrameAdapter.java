@@ -11,7 +11,7 @@ import javax.swing.event.InternalFrameEvent;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 
-public class RobotInternalFrameAdapter extends InternalFrameAdapter {
+public class RobotInternalFrameAdapter extends InternalFrameAdapter implements ConfirmWindow {
     RobotInternalFrame window;
     Path jsonPath;
 
@@ -22,14 +22,12 @@ public class RobotInternalFrameAdapter extends InternalFrameAdapter {
 
     @Override
     public void internalFrameClosing(InternalFrameEvent e) {
-        int option = JOptionPane.showInternalConfirmDialog(
+        int userAnswer = askUserInInternalWindow(
                 window,
                 Localization.getString("exit.question"),
-                Localization.getString("exit.title"),
-                JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE);
-
-        if (option == JOptionPane.YES_OPTION) {
+                Localization.getString("exit.title")
+        );
+        if (userAnswer == JOptionPane.YES_OPTION) {
             window.setVisible(false);
             window.dispose();
         } else
@@ -40,7 +38,6 @@ public class RobotInternalFrameAdapter extends InternalFrameAdapter {
     public void internalFrameClosed(InternalFrameEvent e) {
         SaveState<RobotWindowState> saveState = new SaveState<>();
         saveState.saveT(jsonPath, window.getWindowState());
-//        SaveState.save(window.getWindowState(), jsonPath);
     }
 
     @Override
@@ -48,30 +45,16 @@ public class RobotInternalFrameAdapter extends InternalFrameAdapter {
         SaveState<RobotWindowState> saveState = new SaveState<>();
         try {
             RobotWindowState windowState = saveState.recoverT(jsonPath, RobotWindowState.class);
-            int option = JOptionPane.showInternalConfirmDialog(
+            int userAnswer = askUserInInternalWindow(
                     window,
                     Localization.getString("save.state"),
-                    Localization.getString("save.title"),
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.QUESTION_MESSAGE);
-
-            if (option == JOptionPane.YES_OPTION) {
+                    Localization.getString("save.title")
+            );
+            if (userAnswer == JOptionPane.YES_OPTION) {
                 window.changeWindowState(windowState);
             }
         } catch (FileNotFoundException ex) {
             ex.printStackTrace();
         }
-//        if (SaveState.checkFileNotFound(jsonPath)) {
-//            int option = JOptionPane.showInternalConfirmDialog(
-//                    window,
-//                    Localization.getString("save.state"),
-//                    Localization.getString("save.title"),
-//                    JOptionPane.YES_NO_OPTION,
-//                    JOptionPane.QUESTION_MESSAGE);
-//
-//            if (option == JOptionPane.YES_OPTION) {
-//                window.changeWindowState(SaveState.recover(jsonPath));
-//            }
-//        }
     }
 }

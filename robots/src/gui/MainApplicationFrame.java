@@ -28,10 +28,10 @@ public class MainApplicationFrame extends RobotFrame implements LangChangeable {
         addWindowListener(new RobotsFrameAdapter(this, Path.of("window.main.json")));
         addPropertyChangeListener(new LangChangeAdapter(this, langDispatcher));
         int inset = 50;
-//        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-//        setSize(screenSize.width - inset * 2, screenSize.height - inset * 2);
-//        setLocation(inset, inset);
-//        setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        setSize(screenSize.width - inset * 2, screenSize.height - inset * 2);
+        setLocation(inset, inset);
+        setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
         setContentPane(desktopPane);
 
         LogWindow logWindow = createLogWindow();
@@ -58,7 +58,6 @@ public class MainApplicationFrame extends RobotFrame implements LangChangeable {
                 }
             }
             Localization.save();
-
             System.exit(0);
         }
     }
