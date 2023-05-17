@@ -10,13 +10,14 @@ import localization.LangDispatcher;
 import log.LogChangeListener;
 import log.LogEntry;
 import log.LogWindowSource;
+import serializer.SerializeDispatcher;
 
 public class LogWindow extends RobotInternalFrame implements LogChangeListener {
     private LogWindowSource m_logSource;
     private TextArea m_logContent;
 
-    public LogWindow(LogWindowSource logSource) {
-        super("window.protocol", LangDispatcher.getInstance());
+    public LogWindow(LogWindowSource logSource, SerializeDispatcher serializeDispatcher) {
+        super("window.protocol", LangDispatcher.getInstance(), serializeDispatcher);
         m_logSource = logSource;
         m_logSource.registerListener(this);
         m_logContent = new TextArea("");

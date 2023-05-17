@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.util.Locale;
+import java.util.ResourceBundle;
 
 import javax.swing.*;
 
@@ -14,10 +15,13 @@ import localization.LangChangeable;
 import localization.LangDispatcher;
 import localization.Localization;
 import log.Logger;
+import serializer.SerializeDispatcher;
 
 public class MainApplicationFrame extends JFrame implements LangChangeable {
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final LangDispatcher langDispatcher = LangDispatcher.getInstance();
+    private final ResourceBundle bundle = ResourceBundle.getBundle("lang", new Locale("RU"));
+    private final SerializeDispatcher serializeDispatcher = new SerializeDispatcher(bundle);
     public MainApplicationFrame() {
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -27,14 +31,14 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
         Dimension dimension = new Dimension(400, 400);
-        GameWindow gameWindow = new GameWindow(dimension);
+        GameWindow gameWindow = new GameWindow(dimension, serializeDispatcher);
         gameWindow.setSize(400, 400);
         addWindow(gameWindow);
 
         setJMenuBar(generateMenuBar());
 
         addPropertyChangeListener(new LangChangeAdapter(this, langDispatcher));
-        addWindowListener(new RobotsFrameAdapter(this));
+        addWindowListener(new RobotsFrameAdapter(this, serializeDispatcher));
     }
 
     public JMenuBar generateMenuBar() {
@@ -123,7 +127,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
     }
 
     protected LogWindow createLogWindow() {
-        LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
+        LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource(), serializeDispatcher);
         logWindow.setLocation(10, 10);
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
