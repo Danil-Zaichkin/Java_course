@@ -1,5 +1,6 @@
 package gui;
 
+import log.VarietyTargets;
 import logic.Robot;
 import logic.Target;
 
@@ -7,13 +8,22 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import javax.swing.JPanel;
 
+import static gui.DrawFigure.drawOval;
+import static gui.DrawFigure.fillOval;
+
 public class GameVisualizer extends JPanel {
+
+    CreatorTimer timer;
+    Map<Integer, VarietyTargets> targetViewMap = new HashMap<>();
     private final Timer m_timer = initTimer();
+
     private static Timer initTimer() {
         Timer timer = new Timer("events generator", true);
         return timer;
@@ -32,6 +42,10 @@ public class GameVisualizer extends JPanel {
     private Target target;
 
     public GameVisualizer(Dimension dimension) {
+        timer = new CreatorTimer();
+        for (int i = 0; i < 8; i++) {
+            targetViewMap.put(i + 1, new VarietyTargets());
+        }
         robot = new Robot(m_robotPositionX, m_robotPositionY, dimension);
         target = new Target(m_targetPositionX, m_targetPositionY);
         m_timer.schedule(new TimerTask() {
@@ -53,6 +67,9 @@ public class GameVisualizer extends JPanel {
                 repaint();
             }
         });
+        timer.progressBar.setString("Сытость");
+        timer.progressBar.setStringPainted(true);
+        this.add(timer.progressBar);
 
         setDoubleBuffered(true);
     }
@@ -65,21 +82,35 @@ public class GameVisualizer extends JPanel {
         return (int) (value + 0.5);
     }
 
+    private void paintTTL(Graphics g) {
+        timer.setTTL(robot.getTtl());
+    }
+
     @Override
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
         drawRobot(g2d, round(robot.getPositionX()), round(robot.getPositionY()), robot.getDirection());
         drawTarget(g2d, target.getPositionX(), target.getPositionY());
+        paintTTL(g);
+        for (VarietyTargets values:targetViewMap.values()){
+            drawTarget(g2d, (int) values.getPositionX(), (int) values.getPositionY());
+        }
+//        for (int i = 0; i < 8; i++) {
+//            if (!varietyIsDead[i]){
+//                targetViewMap.get(i + 1).drawTargets(g2d, entityState.getCurrentTargets().get(i + 1));
+//            }
+//
+//        }
     }
 
-    private static void fillOval(Graphics g, int centerX, int centerY, int diam1, int diam2) {
-        g.fillOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
-    }
+//    private static void fillOval(Graphics g, int centerX, int centerY, int diam1, int diam2) {
+//        g.fillOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
+//    }
 
-    private static void drawOval(Graphics g, int centerX, int centerY, int diam1, int diam2) {
-        g.drawOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
-    }
+//    private static void drawOval(Graphics g, int centerX, int centerY, int diam1, int diam2) {
+//        g.drawOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
+//    }
 
     private void drawRobot(Graphics2D g, int x, int y, double direction) {
         int robotCenterX = round(robot.getPositionX());

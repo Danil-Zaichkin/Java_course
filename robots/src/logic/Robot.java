@@ -1,8 +1,12 @@
 package logic;
 
 import java.awt.*;
+import java.util.Timer;
 
 public class Robot {
+
+    private int ttl = 1400;
+    private Timer timer;
     private volatile double m_positionX;
     private volatile double m_positionY;
     private volatile double m_robotDirection = 0;
@@ -31,10 +35,18 @@ public class Robot {
         m_robotDirection = newDirection;
     }
 
+    private synchronized void decrementTTL() {
+        if (ttl > 0) {
+            ttl--;
+        } else {
+            // если ttl <= 0, останавливаем таймер
+            timer.cancel();
+        }
+    }
     public void onModelUpdateEvent(double m_targetPositionX, double m_targetPositionY) {
         double distance = distance(m_targetPositionX, m_targetPositionY,
                 m_positionX, m_positionY);
-        if (distance < 0.5) {
+        if (distance < 0.5 || ttl <= 0) {
             return;
         }
         double velocity = maxVelocity;
@@ -56,6 +68,7 @@ public class Robot {
         }
 
         moveRobot(velocity, angularVelocity, 10, dimension);
+        decrementTTL();
 
 
     }
@@ -102,5 +115,9 @@ public class Robot {
 
     public double getDirection() {
         return m_robotDirection;
+    }
+
+    public int getTtl() {
+        return ttl;
     }
 }
