@@ -38,7 +38,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         setJMenuBar(generateMenuBar());
 
         addPropertyChangeListener(new LangChangeAdapter(this, langDispatcher));
-        addWindowListener(new RobotsFrameAdapter(this, serializeDispatcher));
+        addWindowListener(new RobotsFrameAdapter(this, serializeDispatcher, langDispatcher));
     }
 
     public JMenuBar generateMenuBar() {
@@ -58,9 +58,11 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         JMenuItem setLangEn = new JMenuItem(Localization.getString("language.english"), KeyEvent.VK_N);
         JMenuItem setLangRu = new JMenuItem(Localization.getString("language.russian"), KeyEvent.VK_N);
         setLangEn.addActionListener((event) -> {
+            serializeDispatcher.updateBundle(bundle.getBaseBundleName(), "UK");
             langDispatcher.setLocale(new Locale("UK"));
         });
         setLangRu.addActionListener((event) -> {
+            serializeDispatcher.updateBundle(bundle.getBaseBundleName(), "RU");
             langDispatcher.setLocale(new Locale("RU"));
         });
         local.add(setLangEn);

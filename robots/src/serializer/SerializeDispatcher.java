@@ -43,6 +43,7 @@ public class SerializeDispatcher {
     public void saveState() {
         Preferences preferences = Preferences.userNodeForPackage(ResourceBundle.class);
         preferences.put("baseName", bundle.getBaseBundleName());
+        System.out.println(bundle.getLocale().toString());
         preferences.put("language", bundle.getLocale().toString());
         propChangeDispatcher.firePropertyChange(SAVING_STATE, null, null);
     }
