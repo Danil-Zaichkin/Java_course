@@ -13,10 +13,17 @@ public class SerializeDispatcher {
 
     private final PropertyChangeSupport propChangeDispatcher = new PropertyChangeSupport(this);
 
-    private ResourceBundle bundle;
+//    private ResourceBundle bundle;
+    private ResourceBundle bundle = ResourceBundle.getBundle("lang", new Locale("RU"));
 
-    public SerializeDispatcher(ResourceBundle resourceBundle) {
-        bundle = resourceBundle;
+    private static SerializeDispatcher instance = new SerializeDispatcher();
+
+    private SerializeDispatcher() {
+//        bundle = resourceBundle;
+    }
+
+    public static SerializeDispatcher getInstance() {
+        return instance;
     }
 
     public ResourceBundle getBundle() {

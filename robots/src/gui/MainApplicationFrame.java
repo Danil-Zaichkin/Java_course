@@ -21,7 +21,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final LangDispatcher langDispatcher = LangDispatcher.getInstance();
     private final ResourceBundle bundle = ResourceBundle.getBundle("lang", new Locale("RU"));
-    private final SerializeDispatcher serializeDispatcher = new SerializeDispatcher(bundle);
+    private final SerializeDispatcher serializeDispatcher = SerializeDispatcher.getInstance();
     public MainApplicationFrame() {
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -31,7 +31,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
         Dimension dimension = new Dimension(400, 400);
-        GameWindow gameWindow = new GameWindow(dimension, serializeDispatcher);
+        GameWindow gameWindow = new GameWindow(dimension);
         gameWindow.setSize(400, 400);
         addWindow(gameWindow);
 
@@ -129,7 +129,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
     }
 
     protected LogWindow createLogWindow() {
-        LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource(), serializeDispatcher);
+        LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
         logWindow.setLocation(10, 10);
         logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());

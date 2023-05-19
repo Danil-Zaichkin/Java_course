@@ -16,8 +16,8 @@ public class LogWindow extends RobotInternalFrame implements LogChangeListener {
     private LogWindowSource m_logSource;
     private TextArea m_logContent;
 
-    public LogWindow(LogWindowSource logSource, SerializeDispatcher serializeDispatcher) {
-        super("window.protocol", LangDispatcher.getInstance(), serializeDispatcher);
+    public LogWindow(LogWindowSource logSource) {
+        super("window.protocol", LangDispatcher.getInstance(), SerializeDispatcher.getInstance());
         m_logSource = logSource;
         m_logSource.registerListener(this);
         m_logContent = new TextArea("");
