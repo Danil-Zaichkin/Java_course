@@ -23,15 +23,18 @@ public class CreatorTimer extends JFrame {
         Timer timer = new Timer(DELAY_MS, e -> {
             progressBar.setValue(lifeTimeSeconds);
             if (lifeTimeSeconds <= 0) {
-                ((Timer)e.getSource()).stop();// останавливаем таймер при истечении времени жизни робота
+                ((Timer) e.getSource()).stop();// останавливаем таймер при истечении времени жизни робота
             }
         });
         timer.setInitialDelay(0);
         timer.start();
     }
 
-    public void setTTL(int ttl){
-        System.out.println(lifeTimeSeconds);
-        this.lifeTimeSeconds= ttl;
+    public void setTTL(int ttl) {
+        this.lifeTimeSeconds = ttl;
+    }
+
+    public int getTTL() {
+        return lifeTimeSeconds;
     }
 }

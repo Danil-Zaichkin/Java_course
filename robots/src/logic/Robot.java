@@ -99,7 +99,7 @@ public class Robot {
         return asNormalizedRadians(Math.atan2(diffY, diffX));
     }
 
-    private static double distance(double x1, double y1, double x2, double y2) {
+    public double distance(double x1, double y1, double x2, double y2) {
         double diffX = x1 - x2;
         double diffY = y1 - y2;
         return Math.sqrt(diffX * diffX + diffY * diffY);
@@ -119,5 +119,8 @@ public class Robot {
 
     public int getTtl() {
         return ttl;
+    }
+    public void setTtl(int ttl){
+        this.ttl = ttl;
     }
 }

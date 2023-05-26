@@ -10,6 +10,10 @@ public class VarietyTargets {
         this.x = random.nextInt(30, 350);
         this.y = random.nextInt(30, 350);
     }
+    public void setPosition(){
+        this.x = random.nextInt(30, 350);
+        this.y = random.nextInt(30, 350);
+    }
     public double getPositionX() {
         return x;
     }

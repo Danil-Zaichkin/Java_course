@@ -93,24 +93,10 @@ public class GameVisualizer extends JPanel {
         drawRobot(g2d, round(robot.getPositionX()), round(robot.getPositionY()), robot.getDirection());
         drawTarget(g2d, target.getPositionX(), target.getPositionY());
         paintTTL(g);
-        for (VarietyTargets values:targetViewMap.values()){
-            drawTarget(g2d, (int) values.getPositionX(), (int) values.getPositionY());
+        for (VarietyTargets values : targetViewMap.values()) {
+            drawFood(g2d, (int) values.getPositionX(), (int) values.getPositionY());
         }
-//        for (int i = 0; i < 8; i++) {
-//            if (!varietyIsDead[i]){
-//                targetViewMap.get(i + 1).drawTargets(g2d, entityState.getCurrentTargets().get(i + 1));
-//            }
-//
-//        }
     }
-
-//    private static void fillOval(Graphics g, int centerX, int centerY, int diam1, int diam2) {
-//        g.fillOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
-//    }
-
-//    private static void drawOval(Graphics g, int centerX, int centerY, int diam1, int diam2) {
-//        g.drawOval(centerX - diam1 / 2, centerY - diam2 / 2, diam1, diam2);
-//    }
 
     private void drawRobot(Graphics2D g, int x, int y, double direction) {
         int robotCenterX = round(robot.getPositionX());
@@ -125,6 +111,7 @@ public class GameVisualizer extends JPanel {
         fillOval(g, robotCenterX + 10, robotCenterY, 5, 5);
         g.setColor(Color.BLACK);
         drawOval(g, robotCenterX + 10, robotCenterY, 5, 5);
+        checkCoordinates();
     }
 
     private void drawTarget(Graphics2D g, int x, int y) {
@@ -134,5 +121,26 @@ public class GameVisualizer extends JPanel {
         fillOval(g, x, y, 5, 5);
         g.setColor(Color.BLACK);
         drawOval(g, x, y, 5, 5);
+    }
+
+    private void drawFood(Graphics2D g, int x, int y) {
+        AffineTransform t = AffineTransform.getRotateInstance(0, 0, 0);
+        g.setTransform(t);
+        g.setColor(Color.RED);
+        fillOval(g, x, y, 5, 5);
+        g.setColor(Color.BLACK);
+        drawOval(g, x, y, 5, 5);
+    }
+
+    private void checkCoordinates() {
+        for (VarietyTargets values : targetViewMap.values()) {
+            System.out.println(Math.abs(robot.getPositionX() - values.getPositionX()));
+            if (Math.abs(robot.getPositionX() - values.getPositionX()) < 5
+                    && Math.abs(robot.getPositionY() - values.getPositionY()) < 5) {
+                values.setPosition();
+                robot.setTtl(robot.getTtl() + 20);
+            }
+        }
+
     }
 }
