@@ -22,6 +22,8 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
     private final LangDispatcher langDispatcher = LangDispatcher.getInstance();
     private final ResourceBundle bundle = ResourceBundle.getBundle("lang", new Locale("RU"));
     private final SerializeDispatcher serializeDispatcher = SerializeDispatcher.getInstance();
+
+    private final GameWindow gameWindow;
     public MainApplicationFrame() {
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -31,7 +33,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
         Dimension dimension = new Dimension(400, 400);
-        GameWindow gameWindow = new GameWindow(dimension);
+        this.gameWindow = new GameWindow(dimension);
         gameWindow.setSize(400, 400);
         addWindow(gameWindow);
 
@@ -48,6 +50,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         menuBar.add(generateLookAndFeelMenu());
         menuBar.add(generateLogMenu());
         menuBar.add(generateExitMenu());
+        menuBar.add(generateRestartMenu());
         return menuBar;
     }
 
@@ -69,7 +72,15 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         local.add(setLangRu);
         return local;
     }
-
+    private JMenu generateRestartMenu(){
+        JMenu restartMenu = new JMenu(Localization.getString("restart"));
+        JMenuItem restartButton = new JMenuItem(Localization.getString("restart"), KeyEvent.VK_S);
+        restartButton.addActionListener((event) -> {
+            gameWindow.restartGame();
+        });
+        restartMenu.add(restartButton);
+        return restartMenu;
+    }
     private JMenu generateLogMenu() {
         JMenu testMenu = new JMenu(Localization.getString("tests"));
         testMenu.setMnemonic(KeyEvent.VK_T);

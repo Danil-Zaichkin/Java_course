@@ -1,18 +1,21 @@
 package log;
 
+import java.awt.*;
 import java.util.Random;
 public class VarietyTargets {
     Random random;
     private volatile double x;
     private volatile double y;
-    public VarietyTargets() {
+    public Dimension dimension;
+    public VarietyTargets(Dimension dimension) {
         random = new Random();
-        this.x = random.nextInt(30, 350);
-        this.y = random.nextInt(30, 350);
+        this.dimension = dimension;
+        this.x = random.nextInt(30, (int) dimension.getWidth());
+        this.y = random.nextInt(30, (int) dimension.getHeight());
     }
     public void setPosition(){
-        this.x = random.nextInt(30, 350);
-        this.y = random.nextInt(30, 350);
+        this.x = random.nextInt(30, (int) dimension.getWidth());
+        this.y = random.nextInt(30, (int) dimension.getHeight());
     }
     public double getPositionX() {
         return x;

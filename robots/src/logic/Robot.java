@@ -1,11 +1,15 @@
 package logic;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Timer;
 
-public class Robot {
-
-    private int ttl = 1400;
+public class Robot{
+    private int currentMouseX;
+    private int currentMouseY;
+    private int thirst ;
+    private int hungry ;
     private Timer timer;
     private volatile double m_positionX;
     private volatile double m_positionY;
@@ -15,10 +19,12 @@ public class Robot {
 
     private Dimension dimension;
 
-    public Robot(double positionX, double positionY, Dimension dimension) {
+    public Robot(double positionX, double positionY, Dimension dimension,int thirst,int hungry) {
         m_positionX = positionX;
         m_positionY = positionY;
         this.dimension = dimension;
+        this.thirst = thirst;
+        this.hungry = hungry;
     }
 
     private void moveRobot(double velocity, double angularVelocity, double duration, Dimension dimension) {
@@ -36,8 +42,9 @@ public class Robot {
     }
 
     private synchronized void decrementTTL() {
-        if (ttl > 0) {
-            ttl--;
+        if (thirst > 0 || hungry > 0) {
+            thirst--;
+            hungry--;
         } else {
             // если ttl <= 0, останавливаем таймер
             timer.cancel();
@@ -46,7 +53,7 @@ public class Robot {
     public void onModelUpdateEvent(double m_targetPositionX, double m_targetPositionY) {
         double distance = distance(m_targetPositionX, m_targetPositionY,
                 m_positionX, m_positionY);
-        if (distance < 0.5 || ttl <= 0) {
+        if (distance < 0.5 || thirst <= 0 || hungry <=0) {
             return;
         }
         double velocity = maxVelocity;
@@ -66,7 +73,6 @@ public class Robot {
             else
                 angularVelocity = -maxAngularVelocity;
         }
-
         moveRobot(velocity, angularVelocity, 10, dimension);
         decrementTTL();
 
@@ -77,9 +83,7 @@ public class Robot {
     private static double applyLimits(double value, double min, double max) {
         if (value < min)
             return min;
-        if (value > max)
-            return max;
-        return value;
+        return Math.min(value, max);
     }
 
     private static double asNormalizedRadians(double angle) {
@@ -117,10 +121,17 @@ public class Robot {
         return m_robotDirection;
     }
 
-    public int getTtl() {
-        return ttl;
+    public int getThirst() {
+        return thirst;
     }
-    public void setTtl(int ttl){
-        this.ttl = ttl;
+    public int getHungry(){
+        return hungry;
     }
+    public void setThirst(int thirst){
+        this.thirst = thirst;
+    }
+    public void setHungry(int hungry){
+        this.hungry = hungry;
+    }
+
 }

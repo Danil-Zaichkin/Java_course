@@ -34,7 +34,4 @@ public class CreatorTimer extends JFrame {
         this.lifeTimeSeconds = ttl;
     }
 
-    public int getTTL() {
-        return lifeTimeSeconds;
-    }
 }

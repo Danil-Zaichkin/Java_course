@@ -7,11 +7,11 @@ import logic.Target;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.AffineTransform;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
+import java.util.function.Consumer;
 
 import javax.swing.JPanel;
 
@@ -20,8 +20,9 @@ import static gui.DrawFigure.fillOval;
 
 public class GameVisualizer extends JPanel {
 
-    CreatorTimer timer;
+//    CreatorTimer timer;
     Map<Integer, VarietyTargets> targetViewMap = new HashMap<>();
+    Map<Integer, VarietyTargets> targetsMap = new HashMap<>();
     private final Timer m_timer = initTimer();
 
     private static Timer initTimer() {
@@ -29,6 +30,9 @@ public class GameVisualizer extends JPanel {
         return timer;
     }
 
+    private final int epsilone = 5;
+
+    private final int dopTime = 100;
     private volatile double m_robotPositionX = 100;
     private volatile double m_robotPositionY = 100;
 
@@ -42,11 +46,12 @@ public class GameVisualizer extends JPanel {
     private Target target;
 
     public GameVisualizer(Dimension dimension) {
-        timer = new CreatorTimer();
-        for (int i = 0; i < 8; i++) {
-            targetViewMap.put(i + 1, new VarietyTargets());
+//        timer = new CreatorTimer();
+        for (int i = 0; i < 5; i++) {
+            targetViewMap.put(i + 1, new VarietyTargets(dimension));
+            targetsMap.put(i + 1,new VarietyTargets(dimension));
         }
-        robot = new Robot(m_robotPositionX, m_robotPositionY, dimension);
+        robot = new Robot(m_robotPositionX, m_robotPositionY, dimension,1400,1400);
         target = new Target(m_targetPositionX, m_targetPositionY);
         m_timer.schedule(new TimerTask() {
             @Override
@@ -60,16 +65,15 @@ public class GameVisualizer extends JPanel {
                 robot.onModelUpdateEvent(target.getPositionX(), target.getPositionY());
             }
         }, 0, 10);
-        addMouseListener(new MouseAdapter() {
+        addMouseMotionListener(new MouseMotionAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseMoved(MouseEvent e) {
                 target.setPosition(e.getPoint());
-                repaint();
             }
         });
-        timer.progressBar.setString("Сытость");
-        timer.progressBar.setStringPainted(true);
-        this.add(timer.progressBar);
+//        timer.progressBar.setString("Сытость");
+//        timer.progressBar.setStringPainted(true);
+//        this.add(timer.progressBar);
 
         setDoubleBuffered(true);
     }
@@ -83,8 +87,9 @@ public class GameVisualizer extends JPanel {
     }
 
     private void paintTTL(Graphics g) {
-        timer.setTTL(robot.getTtl());
-    }
+//        timer.setTTL(robot.getTtl());
+        g.drawString("Thirst: " + robot.getThirst() / 100,5,10);
+        g.drawString("Hungry: " + robot.getHungry() / 100, 5, 30);}
 
     @Override
     public void paint(Graphics g) {
@@ -94,7 +99,10 @@ public class GameVisualizer extends JPanel {
         drawTarget(g2d, target.getPositionX(), target.getPositionY());
         paintTTL(g);
         for (VarietyTargets values : targetViewMap.values()) {
-            drawFood(g2d, (int) values.getPositionX(), (int) values.getPositionY());
+            drawFood(g2d, (int) values.getPositionX(), (int) values.getPositionY(),Color.RED);
+        }
+        for (VarietyTargets values: targetsMap.values()){
+            drawFood(g2d, (int) values.getPositionX(), (int) values.getPositionY(),Color.BLUE);
         }
     }
 
@@ -123,24 +131,27 @@ public class GameVisualizer extends JPanel {
         drawOval(g, x, y, 5, 5);
     }
 
-    private void drawFood(Graphics2D g, int x, int y) {
+    private void drawFood(Graphics2D g, int x, int y,Color color) {
         AffineTransform t = AffineTransform.getRotateInstance(0, 0, 0);
         g.setTransform(t);
-        g.setColor(Color.RED);
+        g.setColor(color);
         fillOval(g, x, y, 5, 5);
         g.setColor(Color.BLACK);
         drawOval(g, x, y, 5, 5);
     }
 
     private void checkCoordinates() {
-        for (VarietyTargets values : targetViewMap.values()) {
-            System.out.println(Math.abs(robot.getPositionX() - values.getPositionX()));
-            if (Math.abs(robot.getPositionX() - values.getPositionX()) < 5
-                    && Math.abs(robot.getPositionY() - values.getPositionY()) < 5) {
-                values.setPosition();
-                robot.setTtl(robot.getTtl() + 20);
+        checkValues(targetViewMap.values(), VarietyTargets::setPosition);
+        checkValues(targetsMap.values(), VarietyTargets::setPosition);
+    }
+
+    private void checkValues(Collection<VarietyTargets> values, Consumer<VarietyTargets> action) {
+        for (VarietyTargets target : values) {
+            if (Math.abs(robot.getPositionX() - target.getPositionX()) < epsilone
+                    && Math.abs(robot.getPositionY() - target.getPositionY()) <epsilone) {
+                action.accept(target);
+                robot.setThirst(robot.getThirst() + dopTime);
             }
         }
-
     }
 }
