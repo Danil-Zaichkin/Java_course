@@ -1,5 +1,7 @@
 package gui;
 
+import localization.LangChangeable;
+import localization.Localization;
 import log.VarietyTargets;
 import logic.Robot;
 import logic.Target;
@@ -88,8 +90,8 @@ public class GameVisualizer extends JPanel {
 
     private void paintTTL(Graphics g) {
 //        timer.setTTL(robot.getTtl());
-        g.drawString("Thirst: " + robot.getThirst() / 100,5,10);
-        g.drawString("Hungry: " + robot.getHungry() / 100, 5, 30);}
+        g.drawString(Localization.getString("game.thirst") + ": " + robot.getThirst() / 100,5,10);
+        g.drawString(Localization.getString("game.hungry") + ": " + robot.getHungry() / 100, 5, 30);}
 
     @Override
     public void paint(Graphics g) {
