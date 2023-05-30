@@ -1,5 +1,5 @@
 package localization;
 
-public interface LangChangeable {
+public interface LangChangeListener {
     void updateLang();
 }

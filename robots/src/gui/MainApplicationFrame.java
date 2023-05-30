@@ -11,27 +11,40 @@ import javax.swing.*;
 
 import gui.adapters.LangChangeAdapter;
 import gui.adapters.RobotsFrameAdapter;
-import localization.LangChangeable;
+import localization.LangChangeListener;
 import localization.LangDispatcher;
 import localization.Localization;
 import log.Logger;
+import logic.RobotDispatcher;
 import serializer.SerializeDispatcher;
 
-public class MainApplicationFrame extends JFrame implements LangChangeable {
+public class MainApplicationFrame extends JFrame implements LangChangeListener {
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final LangDispatcher langDispatcher = LangDispatcher.getInstance();
     private final ResourceBundle bundle = ResourceBundle.getBundle("lang", new Locale("RU"));
     private final SerializeDispatcher serializeDispatcher = SerializeDispatcher.getInstance();
 
     private final GameWindow gameWindow;
+
     public MainApplicationFrame() {
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
         setContentPane(desktopPane);
 
+        RobotCoordinatesWindow coordinatesWindow = new RobotCoordinatesWindow("window.coordinates",
+                LangDispatcher.getInstance(), SerializeDispatcher.getInstance(), RobotDispatcher.getInstance());
+        coordinatesWindow.setSize(200, 100);
+        addWindow(coordinatesWindow);
+
+        DistanceWindow distanceWindow = new DistanceWindow("window.distance",
+                LangDispatcher.getInstance(), SerializeDispatcher.getInstance(), RobotDispatcher.getInstance());
+        distanceWindow.setSize(200, 100);
+        addWindow(distanceWindow);
+
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
+
         Dimension dimension = new Dimension(400, 400);
         this.gameWindow = new GameWindow(dimension);
         gameWindow.setSize(400, 400);
@@ -72,7 +85,8 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         local.add(setLangRu);
         return local;
     }
-    private JMenu generateRestartMenu(){
+
+    private JMenu generateRestartMenu() {
         JMenu restartMenu = new JMenu(Localization.getString("restart"));
         JMenuItem restartButton = new JMenuItem(Localization.getString("restart"), KeyEvent.VK_S);
         restartButton.addActionListener((event) -> {
@@ -81,6 +95,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         restartMenu.add(restartButton);
         return restartMenu;
     }
+
     private JMenu generateLogMenu() {
         JMenu testMenu = new JMenu(Localization.getString("tests"));
         testMenu.setMnemonic(KeyEvent.VK_T);
@@ -105,6 +120,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         return lookAndFeelMenu;
 
     }
+
     private void addLookAndFeelItem(JMenu lookAndFeelMenu, String name, String className) {
         JMenuItem crossplatformLookAndFeel = new JMenuItem(
                 Localization.getString(name),
@@ -126,6 +142,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
             e.printStackTrace();
         }
     }
+
     private JMenu generateExitMenu() {
         JMenu exitMenu = new JMenu(Localization.getString("exit"));
         JMenuItem exitMenuItem = new JMenuItem(Localization.getString("exit"));
@@ -135,6 +152,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         exitMenu.add(exitMenuItem);
         return exitMenu;
     }
+
     private void updateGUI() {
         this.setJMenuBar(generateMenuBar());
     }
@@ -153,6 +171,7 @@ public class MainApplicationFrame extends JFrame implements LangChangeable {
         desktopPane.add(frame);
         frame.setVisible(true);
     }
+
     @Override
     public void updateLang() {
         updateGUI();

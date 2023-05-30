@@ -1,13 +1,9 @@
 package logic;
 
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.Timer;
 
 public class Robot{
-    private int currentMouseX;
-    private int currentMouseY;
     private int thirst ;
     private int hungry ;
     private Timer timer;
@@ -16,6 +12,8 @@ public class Robot{
     private volatile double m_robotDirection = 0;
     private static final double maxVelocity = 0.1;
     private static final double maxAngularVelocity = 0.002;
+
+    private final RobotDispatcher dispatcher = RobotDispatcher.getInstance();
 
     private Dimension dimension;
 
@@ -39,23 +37,16 @@ public class Robot{
         m_positionY = applyLimits(newY, 0, dimension.height);
 
         m_robotDirection = newDirection;
+
     }
 
-    private synchronized void decrementTTL() {
-        if (thirst > 0 || hungry > 0) {
+    public synchronized void decrementTTL() {
+        if (thirst > 0 && hungry > 0) {
             thirst--;
             hungry--;
-        } else {
-            // если ttl <= 0, останавливаем таймер
-            timer.cancel();
         }
     }
     public void onModelUpdateEvent(double m_targetPositionX, double m_targetPositionY) {
-        double distance = distance(m_targetPositionX, m_targetPositionY,
-                m_positionX, m_positionY);
-        if (distance < 0.5 || thirst <= 0 || hungry <=0) {
-            return;
-        }
         double velocity = maxVelocity;
         double angleToTarget = angleTo(m_positionX, m_positionY, m_targetPositionX, m_targetPositionY);
         double angularVelocity = 0;
@@ -74,7 +65,8 @@ public class Robot{
                 angularVelocity = -maxAngularVelocity;
         }
         moveRobot(velocity, angularVelocity, 10, dimension);
-        decrementTTL();
+        dispatcher.setDistanceToTarget((int) distance(m_targetPositionX,m_targetPositionY ,m_positionX, m_positionY));
+//        decrementTTL();
 
 
     }
@@ -107,6 +99,10 @@ public class Robot{
         double diffX = x1 - x2;
         double diffY = y1 - y2;
         return Math.sqrt(diffX * diffX + diffY * diffY);
+    }
+
+    public double distanceTo(double x, double y) {
+        return distance(m_positionX, m_positionY, x, y);
     }
 
     public double getPositionX() {

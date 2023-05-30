@@ -29,4 +29,6 @@ public class GameWindow extends RobotInternalFrame {
         panel.add(m_visualizer, BorderLayout.CENTER);
         return panel;
     }
+
+
 }

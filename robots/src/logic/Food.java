@@ -1,13 +1,13 @@
-package log;
+package logic;
 
 import java.awt.*;
 import java.util.Random;
-public class VarietyTargets {
+public class Food {
     Random random;
     private volatile double x;
     private volatile double y;
     public Dimension dimension;
-    public VarietyTargets(Dimension dimension) {
+    public Food(Dimension dimension) {
         random = new Random();
         this.dimension = dimension;
         this.x = random.nextInt(30, (int) dimension.getWidth());

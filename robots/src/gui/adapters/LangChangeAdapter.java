@@ -1,6 +1,6 @@
 package gui.adapters;
 
-import localization.LangChangeable;
+import localization.LangChangeListener;
 import localization.LangDispatcher;
 
 import java.beans.PropertyChangeEvent;
@@ -8,9 +8,9 @@ import java.beans.PropertyChangeListener;
 
 public class LangChangeAdapter implements PropertyChangeListener {
 
-    private final LangChangeable instance;
+    private final LangChangeListener instance;
     private final LangDispatcher dispatcher;
-    public LangChangeAdapter(LangChangeable instance, LangDispatcher dispatcher) {
+    public LangChangeAdapter(LangChangeListener instance, LangDispatcher dispatcher) {
         this.instance = instance;
         this.dispatcher = dispatcher;
         dispatcher.addLangChangeListener(this);

@@ -3,13 +3,13 @@ package gui;
 import gui.adapters.LangChangeAdapter;
 import gui.adapters.RobotInternalFrameAdapter;
 import gui.adapters.SerializeAdapter;
-import localization.LangChangeable;
+import localization.LangChangeListener;
 import localization.LangDispatcher;
 import localization.Localization;
 import serializer.SerializeDispatcher;
 
 import javax.swing.*;
-public abstract class RobotInternalFrame extends JInternalFrame implements LangChangeable {
+public abstract class RobotInternalFrame extends JInternalFrame implements LangChangeListener {
     private final String windowNameKey;
 
     RobotInternalFrame(String windowNameKey, LangDispatcher langDispatcher, SerializeDispatcher serializeDispatcher) {

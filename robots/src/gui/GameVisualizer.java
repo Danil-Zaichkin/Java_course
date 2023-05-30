@@ -1,19 +1,16 @@
 package gui;
 
-import localization.LangChangeable;
 import localization.Localization;
-import log.VarietyTargets;
-import logic.Robot;
-import logic.Target;
+import logic.Food;
+import logic.GameController;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.geom.AffineTransform;
 import java.util.*;
-import java.util.function.Consumer;
 
 import javax.swing.JPanel;
 
@@ -22,9 +19,6 @@ import static gui.DrawFigure.fillOval;
 
 public class GameVisualizer extends JPanel {
 
-//    CreatorTimer timer;
-    Map<Integer, VarietyTargets> targetViewMap = new HashMap<>();
-    Map<Integer, VarietyTargets> targetsMap = new HashMap<>();
     private final Timer m_timer = initTimer();
 
     private static Timer initTimer() {
@@ -32,29 +26,12 @@ public class GameVisualizer extends JPanel {
         return timer;
     }
 
-    private final int epsilone = 5;
+    private GameController gameController;
 
-    private final int dopTime = 100;
-    private volatile double m_robotPositionX = 100;
-    private volatile double m_robotPositionY = 100;
-
-
-    private volatile int m_targetPositionX = 150;
-    private volatile int m_targetPositionY = 100;
-
-    private Dimension screenSize;
-
-    private Robot robot;
-    private Target target;
+    private double zoomLevel = 1;
 
     public GameVisualizer(Dimension dimension) {
-//        timer = new CreatorTimer();
-        for (int i = 0; i < 5; i++) {
-            targetViewMap.put(i + 1, new VarietyTargets(dimension));
-            targetsMap.put(i + 1,new VarietyTargets(dimension));
-        }
-        robot = new Robot(m_robotPositionX, m_robotPositionY, dimension,1400,1400);
-        target = new Target(m_targetPositionX, m_targetPositionY);
+        gameController = new GameController(dimension);
         m_timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -64,20 +41,38 @@ public class GameVisualizer extends JPanel {
         m_timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                robot.onModelUpdateEvent(target.getPositionX(), target.getPositionY());
+                gameController.onModelUpdateEvent();
             }
         }, 0, 10);
         addMouseMotionListener(new MouseMotionAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                target.setPosition(e.getPoint());
+                gameController.getTarget().setPosition(e.getPoint());
             }
         });
-//        timer.progressBar.setString("Сытость");
-//        timer.progressBar.setStringPainted(true);
-//        this.add(timer.progressBar);
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_W -> increaseZoomLevel();
+                    case KeyEvent.VK_S -> decreaseZoomLevel();
+                }
+            }
+        });
 
+        setFocusable(true);
+        requestFocus();
         setDoubleBuffered(true);
+    }
+
+    private void increaseZoomLevel() {
+        if (zoomLevel < 2)
+            zoomLevel += 0.2;
+    }
+
+    private void decreaseZoomLevel() {
+        if (zoomLevel > 1)
+            zoomLevel -= 0.2;
     }
 
     protected void onRedrawEvent() {
@@ -89,44 +84,57 @@ public class GameVisualizer extends JPanel {
     }
 
     private void paintTTL(Graphics g) {
-//        timer.setTTL(robot.getTtl());
-        g.drawString(Localization.getString("game.thirst") + ": " + robot.getThirst() / 100,5,10);
-        g.drawString(Localization.getString("game.hungry") + ": " + robot.getHungry() / 100, 5, 30);}
+        g.drawString(Localization.getString("game.thirst") + ": " +gameController.getRobot().getThirst(),5,10);
+        g.drawString(Localization.getString("game.hungry") + ": " + gameController.getRobot().getHungry(), 5, 30);}
 
     @Override
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
-        drawRobot(g2d, round(robot.getPositionX()), round(robot.getPositionY()), robot.getDirection());
-        drawTarget(g2d, target.getPositionX(), target.getPositionY());
         paintTTL(g);
-        for (VarietyTargets values : targetViewMap.values()) {
+        applyZoomLevel(g2d);
+        drawRobot(g2d, round(gameController.getRobot().getPositionX()), round(gameController.getRobot().getPositionX()),
+                gameController.getRobot().getDirection());
+        drawTarget(g2d, gameController.getTarget().getPositionX(), gameController.getTarget().getPositionY());
+
+        for (Food values : gameController.getRedFood().values()) {
             drawFood(g2d, (int) values.getPositionX(), (int) values.getPositionY(),Color.RED);
         }
-        for (VarietyTargets values: targetsMap.values()){
-            drawFood(g2d, (int) values.getPositionX(), (int) values.getPositionY(),Color.BLUE);
+        for (Food values: gameController.getBlueFood().values()) {
+            drawFood(g2d, (int) values.getPositionX(), (int) values.getPositionY(), Color.BLUE);
         }
+    }
+
+    private void applyZoomLevel(Graphics2D graphics) {
+        int userPositionX = (int) gameController.getRobot().getPositionX();
+        int userPositionY = (int) gameController.getRobot().getPositionY();
+
+        AffineTransform transform = new AffineTransform();
+
+        transform.translate(userPositionX, userPositionY);
+        transform.scale(zoomLevel, zoomLevel);
+        transform.translate(-userPositionX, -userPositionY);
+
+        graphics.setTransform(transform);
     }
 
     private void drawRobot(Graphics2D g, int x, int y, double direction) {
-        int robotCenterX = round(robot.getPositionX());
-        int robotCenterY = round(robot.getPositionY());
-        AffineTransform t = AffineTransform.getRotateInstance(direction, robotCenterX, robotCenterY);
-        g.setTransform(t);
-        g.setColor(Color.MAGENTA);
-        fillOval(g, robotCenterX, robotCenterY, 30, 10);
-        g.setColor(Color.BLACK);
-        drawOval(g, robotCenterX, robotCenterY, 30, 10);
-        g.setColor(Color.WHITE);
-        fillOval(g, robotCenterX + 10, robotCenterY, 5, 5);
-        g.setColor(Color.BLACK);
-        drawOval(g, robotCenterX + 10, robotCenterY, 5, 5);
-        checkCoordinates();
+        int robotCenterX = round(gameController.getRobot().getPositionX());
+        int robotCenterY = round(gameController.getRobot().getPositionY());
+
+        Graphics2D robotGraphics = (Graphics2D) g.create();
+        robotGraphics.rotate(direction, robotCenterX, robotCenterY);
+        robotGraphics.setColor(Color.MAGENTA);
+        fillOval(robotGraphics, robotCenterX, robotCenterY, 30, 10);
+        robotGraphics.setColor(Color.BLACK);
+        drawOval(robotGraphics, robotCenterX, robotCenterY, 30, 10);
+        robotGraphics.setColor(Color.WHITE);
+        fillOval(robotGraphics, robotCenterX + 10, robotCenterY, 5, 5);
+        robotGraphics.setColor(Color.BLACK);
+        drawOval(robotGraphics, robotCenterX + 10, robotCenterY, 5, 5);
     }
 
     private void drawTarget(Graphics2D g, int x, int y) {
-        AffineTransform t = AffineTransform.getRotateInstance(0, 0, 0);
-        g.setTransform(t);
         g.setColor(Color.GREEN);
         fillOval(g, x, y, 5, 5);
         g.setColor(Color.BLACK);
@@ -134,26 +142,9 @@ public class GameVisualizer extends JPanel {
     }
 
     private void drawFood(Graphics2D g, int x, int y,Color color) {
-        AffineTransform t = AffineTransform.getRotateInstance(0, 0, 0);
-        g.setTransform(t);
         g.setColor(color);
         fillOval(g, x, y, 5, 5);
         g.setColor(Color.BLACK);
         drawOval(g, x, y, 5, 5);
-    }
-
-    private void checkCoordinates() {
-        checkValues(targetViewMap.values(), VarietyTargets::setPosition);
-        checkValues(targetsMap.values(), VarietyTargets::setPosition);
-    }
-
-    private void checkValues(Collection<VarietyTargets> values, Consumer<VarietyTargets> action) {
-        for (VarietyTargets target : values) {
-            if (Math.abs(robot.getPositionX() - target.getPositionX()) < epsilone
-                    && Math.abs(robot.getPositionY() - target.getPositionY()) <epsilone) {
-                action.accept(target);
-                robot.setThirst(robot.getThirst() + dopTime);
-            }
-        }
     }
 }
