@@ -7,19 +7,23 @@ import java.util.Map;
 
 public class GameController {
     private Robot robot;
-    private Target target;
+    private final Target target;
     private final int epsilone = 5;
 
     private final int redFoodBonus = 99;
     private final int blueFoodBonus = 87;
+    private final double startRobotPositionY;
+    private final double startRobotPositionX;
+    private Dimension fieldDimension;
     Map<Integer, Food> redFood = new HashMap<>();
     Map<Integer, Food> blueFood = new HashMap<>();
 
     private final RobotDispatcher dispatcher = RobotDispatcher.getInstance();
 
     public GameController(Dimension fieldDimension) {
-        double startRobotPositionY = 100;
-        double startRobotPositionX = 100;
+        this.fieldDimension = fieldDimension;
+        startRobotPositionY = 100;
+        startRobotPositionX = 100;
         robot = new Robot(startRobotPositionX, startRobotPositionY, fieldDimension, 1400, 1400);
         int startTargetPositionX = 100;
         int startTargetPositionY = 150;
@@ -31,7 +35,13 @@ public class GameController {
         }
     }
 
-
+    public void restartGame() {
+        robot = new Robot(startRobotPositionX, startRobotPositionY, fieldDimension, 1400, 1400);
+        for (int i = 0; i < 5; i++) {
+            redFood.put(i + 1, new Food(fieldDimension));
+            blueFood.put(i + 1, new Food(fieldDimension));
+        }
+    }
     public void onModelUpdateEvent() {
         robot.decrementTTL();
         double robotDistanceToPoint = robot.distanceTo(target.getPositionX(), target.getPositionY());

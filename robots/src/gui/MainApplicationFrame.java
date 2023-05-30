@@ -11,6 +11,7 @@ import javax.swing.*;
 
 import gui.adapters.LangChangeAdapter;
 import gui.adapters.RobotsFrameAdapter;
+import gui.game.GameWindow;
 import localization.LangChangeListener;
 import localization.LangDispatcher;
 import localization.Localization;

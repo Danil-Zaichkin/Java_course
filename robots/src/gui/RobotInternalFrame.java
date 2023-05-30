@@ -12,7 +12,7 @@ import javax.swing.*;
 public abstract class RobotInternalFrame extends JInternalFrame implements LangChangeListener {
     private final String windowNameKey;
 
-    RobotInternalFrame(String windowNameKey, LangDispatcher langDispatcher, SerializeDispatcher serializeDispatcher) {
+    protected RobotInternalFrame(String windowNameKey, LangDispatcher langDispatcher, SerializeDispatcher serializeDispatcher) {
         super(Localization.getString(windowNameKey), true, true, true, true);
         this.windowNameKey = windowNameKey;
         addInternalFrameListener(new RobotInternalFrameAdapter(this));

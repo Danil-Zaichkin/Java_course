@@ -1,5 +1,7 @@
-package gui;
+package gui.game;
 
+import gui.RobotInternalFrame;
+import gui.game.GameVisualizer;
 import localization.LangDispatcher;
 import serializer.SerializeDispatcher;
 
@@ -18,10 +20,7 @@ public class GameWindow extends RobotInternalFrame {
         pack();
     }
     public void restartGame(){
-        setPreferredSize(dimension);
-        getContentPane().removeAll();
-        getContentPane().add(initPanel());
-        pack();
+        m_visualizer.restartGame();
     }
     private JPanel initPanel(){
         m_visualizer = new GameVisualizer(dimension);

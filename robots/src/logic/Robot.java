@@ -47,7 +47,6 @@ public class Robot{
         }
     }
     public void onModelUpdateEvent(double m_targetPositionX, double m_targetPositionY) {
-        double velocity = maxVelocity;
         double angleToTarget = angleTo(m_positionX, m_positionY, m_targetPositionX, m_targetPositionY);
         double angularVelocity = 0;
 
@@ -64,7 +63,7 @@ public class Robot{
             else
                 angularVelocity = -maxAngularVelocity;
         }
-        moveRobot(velocity, angularVelocity, 10, dimension);
+        moveRobot(maxVelocity, angularVelocity, 10, dimension);
         dispatcher.setDistanceToTarget((int) distance(m_targetPositionX,m_targetPositionY ,m_positionX, m_positionY));
 //        decrementTTL();
 

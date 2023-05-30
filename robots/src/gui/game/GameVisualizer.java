@@ -1,4 +1,4 @@
-package gui;
+package gui.game;
 
 import localization.Localization;
 import logic.Food;
@@ -14,8 +14,8 @@ import java.util.*;
 
 import javax.swing.JPanel;
 
-import static gui.DrawFigure.drawOval;
-import static gui.DrawFigure.fillOval;
+import static gui.game.DrawFigure.drawOval;
+import static gui.game.DrawFigure.fillOval;
 
 public class GameVisualizer extends JPanel {
 
@@ -65,12 +65,17 @@ public class GameVisualizer extends JPanel {
         setDoubleBuffered(true);
     }
 
+    public void restartGame() {
+        gameController.restartGame();
+    }
     private void increaseZoomLevel() {
+        System.out.println(1);
         if (zoomLevel < 2)
             zoomLevel += 0.2;
     }
 
     private void decreaseZoomLevel() {
+        System.out.println(2);
         if (zoomLevel > 1)
             zoomLevel -= 0.2;
     }
